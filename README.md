@@ -1,5 +1,29 @@
-# OpenSearch MCP Server
-A minimal Model Context Protocol (MCP) server for OpenSearch exposing 4 tools over stdio and sse server.
+![OpenSearch logo](https://github.com/opensearch-project/opensearch-py/raw/main/OpenSearch.svg)
+
+- [OpenSearch MCP Server](https://github.com/opensearch-project/opensearch-mcp-server-py#opensearch-mcp-server)
+- [Installing opensearch-mcp-server-py](https://github.com/opensearch-project/opensearch-mcp-server-py#installing-opensearch-mcp-server-py)
+- [Available tools](https://github.com/opensearch-project/opensearch-mcp-server-py#available-tools)
+- [User Guide](https://github.com/opensearch-project/opensearch-mcp-server-py#user-guide)
+- [Contributing](https://github.com/opensearch-project/opensearch-mcp-server-py#contributing)
+- [Code of Conduct](https://github.com/opensearch-project/opensearch-mcp-server-py#code-of-conduct)
+- [License](https://github.com/opensearch-project/opensearch-mcp-server-py#license)
+- [Copyright](https://github.com/opensearch-project/opensearch-mcp-server-py#copyright)
+
+## OpenSearch MCP Server
+**opensearch-mcp-server-py** is a Model Context Protocol (MCP) server for OpenSearch that enables AI assistants to interact with OpenSearch clusters. It provides a standardized interface for AI models to perform operations like searching indices, retrieving mappings, and managing shards through both stdio and Server-Sent Events (SSE) protocols.
+
+**Key features:**
+- Seamless integration with AI assistants and LLMs through the MCP protocol
+- Support for both stdio and SSE server transports
+- Built-in tools for common OpenSearch operations
+- Easy integration with Claude Desktop and LangChain
+- Secure authentication using basic auth or IAM roles
+
+## Installing opensearch-mcp-server-py
+Opensearch-mcp-server-py can be installed from [PyPI](https://pypi.org/project/opensearch-mcp-server-py/) via pip:
+```
+pip install opensearch-mcp-server-py
+```
 
 ## Available tools
 - ListIndexTool: Lists all indices in OpenSearch.
@@ -10,156 +34,18 @@ A minimal Model Context Protocol (MCP) server for OpenSearch exposing 4 tools ov
 > More tools coming soon. [Click here](DEVELOPER_GUIDE.md#contributing)
 
 ## User Guide
-### Installation
+For detailed usage instructions, configuration options, and examples, please see the [User Guide](USER_GUIDE.md).
 
-Install from PyPI:
-```
-pip install test-opensearch-mcp
-```
-
-### Configuration
-#### Authentication Methods:
-- **Basic Authentication**
-```
-export OPENSEARCH_URL="<your_opensearch_domain_url>"
-export OPENSEARCH_USERNAME="<your_opensearch_domain_username>"
-export OPENSEARCH_PASSWORD="<your_opensearch_domain_password>"
-```
-
-- **IAM Role Authentication**
-```
-export OPENSEARCH_URL="<your_opensearch_domain_url>"
-export AWS_REGION="<your_aws_region>"
-export AWS_ACCESS_KEY_ID="<your_aws_access_key>"
-export AWS_SECRET_ACCESS_KEY="<your_aws_secret_access_key>"
-export AWS_SESSION_TOKEN="<your_aws_session_token>"
-```
-
-### Running the Server
-```
-# Stdio Server
-python -m mcp_server_opensearch
-
-# SSE Server
-python -m mcp_server_opensearch --transport sse
-```
-
-### Claude Desktop Integration
-- **Using the Published [PyPI Package](https://pypi.org/project/test-opensearch-mcp/) (Recommended)**
-```
-{
-    "mcpServers": {
-        "opensearch-mcp-server": {
-            "command": "uvx",
-            "args": [
-                "test-opensearch-mcp"
-            ],
-            "env": {
-                // Required
-                "OPENSEARCH_URL": "<your_opensearch_domain_url>",
-
-                // For Basic Authentication
-                "OPENSEARCH_USERNAME": "<your_opensearch_domain_username>",
-                "OPENSEARCH_PASSWORD": "<your_opensearch_domain_password>",
-
-                // For IAM Role Authentication
-                "AWS_REGION": "<your_aws_region>",
-                "AWS_ACCESS_KEY_ID": "<your_aws_access_key>",
-                "AWS_SECRET_ACCESS_KEY": "<your_aws_secret_access_key>",
-                "AWS_SESSION_TOKEN": "<your_aws_session_token>"
-            }
-        }
-    }
-}
-```
-
-- **Using the Installed Package (via pip):**
-```
-{
-    "mcpServers": {
-        "opensearch-mcp-server": {
-            "command": "python",  // Or full path to python with PyPI package installed
-            "args": [
-                "-m",
-                "mcp_server_opensearch"
-            ],
-            "env": {
-                // Required
-                "OPENSEARCH_URL": "<your_opensearch_domain_url>",
-
-                // For Basic Authentication
-                "OPENSEARCH_USERNAME": "<your_opensearch_domain_username>",
-                "OPENSEARCH_PASSWORD": "<your_opensearch_domain_password>",
-
-                // For IAM Role Authentication
-                "AWS_REGION": "<your_aws_region>",
-                "AWS_ACCESS_KEY_ID": "<your_aws_access_key>",
-                "AWS_SECRET_ACCESS_KEY": "<your_aws_secret_access_key>",
-                "AWS_SESSION_TOKEN": "<your_aws_session_token>"
-            }
-        }
-    }
-}
-```
-
-### LangChain Integration
-The OpenSearch MCP server can be easily integrated with LangChain using the SSE server transport
-
-#### Prerequisites
-1. Install required packages
-```
-pip install langchain langchain-mcp-adapters langchain-openai
-```
-2. Set up OpenAI API key
-```
-export OPENAI_API_KEY="<your-openai-key>"
-```
-3. Ensure OpenSearch MCP server is running in SSE mode
-```
-python -m mcp_server_opensearch --transport sse
-```
-
-#### Example Integration Script
-``` python 
-import asyncio
-from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_openai import ChatOpenAI
-from langchain.agents import AgentType, initialize_agent
-
-# Initialize LLM (can use any LangChain-compatible LLM)
-model = ChatOpenAI(model="gpt-4o")
-
-async def main():
-    # Connect to MCP server and create agent
-    async with MultiServerMCPClient({
-        "opensearch-mcp-server": {
-            "transport": "sse",
-            "url": "http://localhost:9900/sse",  # SSE server endpoint
-            "headers": {
-                "Authorization": "Bearer secret-token",
-            }
-        }
-    }) as client:
-        tools = client.get_tools()
-        agent = initialize_agent(
-            tools=tools,
-            llm=model,
-            agent=AgentType.OPENAI_FUNCTIONS,
-            verbose=True,  # Enables detailed output of the agent's thought process
-        )
-
-        # Example query
-        await agent.ainvoke({"input": "List all indices"})
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-**Notes:**
-- The script is compatible with any LLM that integrates with LangChain and supports tool calling
-- Make sure the OpenSearch MCP server is running before executing the script
-- Configure authentication and environment variables as needed
-
-## Development
+## Contributing
 Interested in contributing? Check out our:
-- [Development Guide](DEVELOPER_GUIDE.md#developer-guide) - Setup your development environment
+- [Development Guide](DEVELOPER_GUIDE.md#opensearch-mcp-server-py-developer-guide) - Setup your development environment
 - [Contributing Guidelines](DEVELOPER_GUIDE.md#contributing) - Learn how to contribute
+
+## Code of Conduct
+This project has adopted the [Amazon Open Source Code of Conduct](CODE_OF_CONDUCT.md). For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq), or contact [opensource-codeofconduct@amazon.com](mailto:opensource-codeofconduct@amazon.com) with any additional questions or comments.
+
+## License
+This project is licensed under the [Apache v2.0 License](LICENSE).
+
+## Copyright
+Copyright 2020-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.

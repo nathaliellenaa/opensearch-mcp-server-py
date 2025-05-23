@@ -1,10 +1,17 @@
-# Developer Guide
-## Local Development Setup
-1. Clone the Repository
-```
-git clone git@github.com:rithin-pullela-aws/opensearch-mcp-server.git
+![OpenSearch logo](https://github.com/opensearch-project/opensearch-py/raw/main/OpenSearch.svg)
 
-cd opensearch-mcp-server
+# OpenSearch-mcp-server-py Developer Guide
+## Local Development Setup
+
+1. Fork and Clone the Repository
+
+All local development should be done in a forked repository. Fork `opensearch-mcp-server-py` by clicking the "Fork" button at the top of the GitHub repository.
+
+Clone your forked version of `opensearch-mcp-server-py` to your local machine (replace `opensearch-project` in the command below with your GitHub username):
+```
+git clone git@github.com:opensearch-project/opensearch-mcp-server-py.git
+
+cd opensearch-mcp-server-py
 ```
 
 2. Set Up Development Environment
@@ -51,7 +58,7 @@ uv sync
             "command": "uv", # Or full path to uv
             "args": [
                 "--directory",
-                "path/to/the/clone/opensearch-mcp-server",
+                "path/to/the/clone/opensearch-mcp-server-py",
                 "run",
                 "--",
                 "python",
