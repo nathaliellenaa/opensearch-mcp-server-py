@@ -45,7 +45,7 @@ Interested in contributing? Check out our:
 This project has adopted the [Amazon Open Source Code of Conduct](CODE_OF_CONDUCT.md). For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq), or contact [opensource-codeofconduct@amazon.com](mailto:opensource-codeofconduct@amazon.com) with any additional questions or comments.
 
 ## License
-This project is licensed under the [Apache v2.0 License](LICENSE).
+This project is licensed under the [Apache v2.0 License](LICENSE.txt).
 
 ## Copyright
 Copyright 2020-2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
