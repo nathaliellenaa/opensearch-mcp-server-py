@@ -9,6 +9,9 @@ from opensearch.helper import get_opensearch_version
 import os
 import logging
 
+from tools.tools import TOOL_REGISTRY
+from tools.tool_generator import generate_tools_from_openapi
+from opensearch.client import initialize_client
 
 # --- Server setup ---
 async def serve() -> None:
@@ -18,6 +21,8 @@ async def serve() -> None:
     enabled_tools = get_enabled_tools(version)
     logging.info(f"Connected OpenSearch version: {version}")
     logging.info(f"Enabled tools: {list(enabled_tools.keys())}")
+
+    await generate_tools_from_openapi(initialize_client(opensearch_url))
 
     @server.list_tools()
     async def list_tools() -> list[Tool]:
