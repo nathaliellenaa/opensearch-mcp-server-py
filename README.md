@@ -30,6 +30,12 @@ pip install opensearch-mcp-server-py
 - IndexMappingTool: Retrieves index mapping and setting information for an index in OpenSearch.
 - SearchIndexTool: Searches an index using a query written in query domain-specific language (DSL) in OpenSearch.
 - GetShardsTool: Gets information about shards in OpenSearch.
+- ClusterHealthTool : Returns basic information about the health of the cluster.
+- IndicesCreateTool : Creates an index with optional settings and mappings.
+- IndicesPutMappingTool : Updates the index mappings.
+- CountTool : Returns number of documents matching a query.
+- MsearchTool : Allows to execute several search operations in one request.
+- ExplainTool : Returns information about why a specific matches (or doesn't match) a query.
 
 > More tools coming soon. [Click here](DEVELOPER_GUIDE.md#contributing)
 

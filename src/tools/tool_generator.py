@@ -33,19 +33,16 @@ async def fetch_github_spec(file_name: str) -> Dict:
 def group_endpoints_by_operation(paths: Dict[str, Dict]) -> Dict[str, List[Dict]]:
     """Group endpoints by their x-operation-group."""
     grouped_ops = {}
-
     for path, methods in paths.items():
         for method, details in methods.items():
             op_group = details.get('x-operation-group')
             # TODO: remove this hard-coded logic once we have the tool filtering feature
             if op_group in SUPPORTED_OPERATIONS:
-                if op_group in SUPPORTED_OPERATIONS:
-                    grouped_ops.setdefault(op_group, []).append({
-                        'path': path,
-                        'method': method,
-                        'details': details
-                    })
-
+                grouped_ops.setdefault(op_group, []).append({
+                    'path': path,
+                    'method': method,
+                    'details': details
+                })
     return grouped_ops
 
 def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set]:
@@ -102,19 +99,16 @@ def process_body(body: Any, tool_name: str) -> Any:
 
     # Handle dictionary body
     if isinstance(body, dict):
-        # Convert float to int for index settings
-        # TODO: Remove this hardcoded logic once we found a better way to handle this
-        if "settings" in body:
-            settings = body["settings"]
-            if isinstance(settings, dict):
-                for section in [settings, settings.get("index", {})]:
-                    for key in ["number_of_shards", "number_of_replicas"]:
-                        if isinstance(section.get(key), float):
-                            section[key] = int(section[key])
+        # Convert float values to integers where needed to avoid failed API calls
+        # e.g., convert 1.0 to 1 in index settings to avoid illegal_argument_exception
+        for key, value in body.items():
+            if isinstance(value, float) and value.is_integer():
+                body[key] = int(value)
+            elif isinstance(value, dict):
+                body[key] = process_body(value, tool_name)
         return body
 
     # Handle string body
-    
     if isinstance(body, str):
         # Multi search tool (msearch) requires request body to be in NDJSON format
         if tool_name == "Msearch" and "\n" in body:
@@ -125,9 +119,7 @@ def process_body(body: Any, tool_name: str) -> Any:
                 return json.loads(body)
             except json.JSONDecodeError:
                 raise ValueError("Invalid JSON in body parameter")
-        
         return None
-
     return body
 
 def select_endpoint(endpoints: list[dict], params: dict) -> dict:
