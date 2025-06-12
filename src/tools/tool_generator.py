@@ -111,9 +111,22 @@ def process_body(body: Any, tool_name: str) -> Any:
     # Handle string body
     if isinstance(body, str):
         # Multi search tool (msearch) requires request body to be in NDJSON format
-        if tool_name == "Msearch" and "\n" in body:
-            return body if body.endswith("\n") else body + "\n"
+        if tool_name == "Msearch":
+            try:
+                # Check if it's a JSON array string
+                parsed = json.loads(body)
+                if isinstance(parsed, list):
+                    # Convert JSON array to NDJSON format
+                    ndjson = ""
+                    for item in parsed:
+                        ndjson += json.dumps(item) + "\n"
+                    return ndjson
+                return body if body.endswith("\n") else body + "\n"
+            except json.JSONDecodeError:
+                # If not valid JSON, treat as NDJSON
+                return body if body.endswith("\n") else body + "\n"
         
+        # For other tools, parse JSON string to object
         if body.strip():
             try:
                 return json.loads(body)

@@ -30,8 +30,9 @@ class TestMCPServer:
             }
         }
 
+    @pytest.mark.asyncio
     @patch("mcp_server_opensearch.sse_server.get_enabled_tools")
-    def test_create_mcp_server(self, mock_registry, mock_tool_registry):
+    async def test_create_mcp_server(self, mock_registry, mock_tool_registry):
         """Test MCP server creation"""
         # Setup mock registry
         mock_registry.items.return_value = mock_tool_registry.items()
