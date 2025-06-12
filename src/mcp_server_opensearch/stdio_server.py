@@ -17,6 +17,11 @@ from opensearch.client import initialize_client
 async def serve() -> None:
     server = Server("opensearch-mcp-server")
     opensearch_url = os.getenv("OPENSEARCH_URL", "https://localhost:9200")
+
+    # Call tool generator
+    await generate_tools_from_openapi(initialize_client(opensearch_url))
+
+    # Filter all tools by version
     version = get_opensearch_version(opensearch_url)
     enabled_tools = get_enabled_tools(version)
     logging.info(f"Connected OpenSearch version: {version}")

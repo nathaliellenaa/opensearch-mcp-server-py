@@ -152,7 +152,13 @@ def select_endpoint(endpoints: list[dict], params: dict) -> dict:
 def generate_tool_from_group(tool_name: str, endpoints: List[Dict], client: OpenSearch) -> Dict[str, Any]:
     """Generate a single tool from a group of related endpoints."""
     # Use the description from the first endpoint in the group
-    description = endpoints[0]['details'].get('description', '')
+    details = endpoints[0]['details']
+    description = details.get('description', '')
+
+    # Extract version information
+    min_version = details.get('x-version-added', '0.0.0')
+    max_version = details.get('x-version-deprecated', '99.99.99')
+
     all_parameters, path_parameters = extract_parameters(endpoints)
 
     # Create Pydantic model for arguments
@@ -220,7 +226,9 @@ def generate_tool_from_group(tool_name: str, endpoints: List[Dict], client: Open
             "properties": all_parameters
         },
         'function': tool_func,
-        'args_model': args_model
+        'args_model': args_model,
+        'min_version': min_version,
+        'max_version': max_version
     }
 
 async def generate_tools_from_openapi(client: OpenSearch) -> Dict[str, Dict[str, Any]]:
