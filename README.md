@@ -35,7 +35,7 @@ pip install opensearch-mcp-server-py
 - IndicesPutMappingTool : Updates the index mappings.
 - CountTool : Returns number of documents matching a query.
 - MsearchTool : Allows to execute several search operations in one request.
-- ExplainTool : Returns information about why a specific matches (or doesn't match) a query.
+- ExplainTool : Returns information about why a specific document matches (or doesn't match) a query.
 
 > More tools coming soon. [Click here](DEVELOPER_GUIDE.md#contributing)
 
