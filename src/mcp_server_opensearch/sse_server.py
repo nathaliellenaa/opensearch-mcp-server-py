@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-
+import os
+import logging
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -13,11 +14,6 @@ from mcp.server import Server
 from mcp.types import TextContent, Tool
 from tools.common import get_enabled_tools
 from opensearch.helper import get_opensearch_version
-
-import os
-import logging
-
-from tools.tools import TOOL_REGISTRY
 from tools.tool_generator import generate_tools_from_openapi
 from opensearch.client import initialize_client
 

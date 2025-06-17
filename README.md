@@ -25,17 +25,52 @@ Opensearch-mcp-server-py can be installed from [PyPI](https://pypi.org/project/o
 pip install opensearch-mcp-server-py
 ```
 
-## Available tools
-- ListIndexTool: Lists all indices in OpenSearch.
-- IndexMappingTool: Retrieves index mapping and setting information for an index in OpenSearch.
-- SearchIndexTool: Searches an index using a query written in query domain-specific language (DSL) in OpenSearch.
-- GetShardsTool: Gets information about shards in OpenSearch.
-- ClusterHealthTool : Returns basic information about the health of the cluster.
-- IndicesCreateTool : Creates an index with optional settings and mappings.
-- IndicesPutMappingTool : Updates the index mappings.
-- CountTool : Returns number of documents matching a query.
-- MsearchTool : Allows to execute several search operations in one request.
-- ExplainTool : Returns information about why a specific document matches (or doesn't match) a query.
+## Available Tools
+- [ListIndexTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-indices/): Lists all indices in OpenSearch.
+- [IndexMappingTool](https://docs.opensearch.org/docs/latest/ml-commons-plugin/agents-tools/tools/index-mapping-tool/): Retrieves index mapping and setting information for an index in OpenSearch.
+- [SearchIndexTool](https://docs.opensearch.org/docs/latest/ml-commons-plugin/agents-tools/tools/search-index-tool/): Searches an index using a query written in query domain-specific language (DSL) in OpenSearch.
+- [GetShardsTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-shards/): Gets information about shards in OpenSearch.
+- [ClusterHealthTool](https://docs.opensearch.org/docs/latest/api-reference/cluster-api/cluster-health/): Returns basic information about the health of the cluster.
+- [CountTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/count/): Returns number of documents matching a query.
+- [ExplainTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/explain/): Returns information about why a specific document matches (or doesn't match) a query.
+- [MsearchTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/multi-search/): Allows to execute several search operations in one request.
+
+### Tool Parameters
+- **ListIndexTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+
+- **IndexMappingTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (required): The name of the index to retrieve mappings for
+
+- **SearchIndexTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (required): The name of the index to search in
+    - `query` (required): The search query in OpenSearch Query DSL format
+
+- **GetShardsTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (required): The name of the index to get shard information for
+    
+- **ClusterHealthTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (optional): Limit health reporting to a specific index
+
+- **CountTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (optional): The name of the index to count documents in
+    - `body` (optional): Query in JSON format to filter documents
+
+- **ExplainTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (required): The name of the index to retrieve the document from
+    - `id` (required): The document ID to explain
+    - `body` (required): Query in JSON format to explain against the document
+
+- **MsearchTool**
+    - `opensearch_url` (optional): The OpenSearch cluster URL to connect to
+    - `index` (optional): Default index to search in
+    - `body` (required): Multi-search request body in NDJSON format
 
 > More tools coming soon. [Click here](DEVELOPER_GUIDE.md#contributing)
 

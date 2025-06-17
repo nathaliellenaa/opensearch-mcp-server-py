@@ -13,11 +13,8 @@ from .tools import TOOL_REGISTRY
 
 # Constants
 BASE_URL = "https://raw.githubusercontent.com/opensearch-project/opensearch-api-specification/refs/heads/main/spec/namespaces"
-SPEC_FILES = ["cluster.yaml", "indices.yaml", "_core.yaml"]
-SUPPORTED_OPERATIONS = [
-    "msearch", "explain", "indices.create", 
-    "indices.put_mapping", "count", "cluster.health"
-]
+SPEC_FILES = ["cluster.yaml", "_core.yaml"]
+SUPPORTED_OPERATIONS = ["msearch", "explain", "count", "cluster.health"]
 
 async def fetch_github_spec(file_name: str) -> Dict:
     """Fetch OpenSearch API specification from GitHub asynchronously."""
@@ -36,7 +33,7 @@ def group_endpoints_by_operation(paths: Dict[str, Dict]) -> Dict[str, List[Dict]
     for path, methods in paths.items():
         for method, details in methods.items():
             op_group = details.get('x-operation-group')
-            # TODO: remove this hard-coded logic once we have the tool filtering feature
+            # TODO: Remove hard-coded logic once we have the tool filtering feature
             if op_group in SUPPORTED_OPERATIONS:
                 grouped_ops.setdefault(op_group, []).append({
                     'path': path,
@@ -57,8 +54,11 @@ def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set]:
     }
     path_parameters = set()
 
+    # Track which path parameters appear in which endpoints
+    param_to_endpoints = {}
+
     # Extract parameters from endpoints
-    for endpoint in endpoints:
+    for i, endpoint in enumerate(endpoints):
         path = endpoint['path']
         details = endpoint['details']
         
@@ -71,6 +71,7 @@ def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set]:
                     "title": param_name.title(),
                     "type": "string",
                 }
+                param_to_endpoints.setdefault(param_name, set()).add(i)
         
         # Add parameters from the endpoint details
         for param in details.get('parameters', []):
@@ -89,6 +90,17 @@ def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set]:
                 "title": "Body",
                 "description": "Request body",
             }
+
+    # Mark parameters as required if they appear in all endpoints
+    for param, endpoint_indices in param_to_endpoints.items():
+        if len(endpoint_indices) == len(endpoints):
+            all_parameters[param]["required"] = True
+    
+    # Mark body as required for ExplainTool and MsearchTool
+    # TODO: Remove hard-coded logic once we found a better way to determine required request body
+    op_group = endpoints[0]['details'].get('x-operation-group', '')
+    if op_group in ['explain', 'msearch'] and 'body' in all_parameters:
+        all_parameters['body']["required"] = True
     
     return all_parameters, path_parameters
 
@@ -96,17 +108,6 @@ def process_body(body: Any, tool_name: str) -> Any:
     """Process request body based on tool type and format."""
     if body is None:
         return None
-
-    # Handle dictionary body
-    if isinstance(body, dict):
-        # Convert float values to integers where needed to avoid failed API calls
-        # e.g., convert 1.0 to 1 in index settings to avoid illegal_argument_exception
-        for key, value in body.items():
-            if isinstance(value, float) and value.is_integer():
-                body[key] = int(value)
-            elif isinstance(value, dict):
-                body[key] = process_body(value, tool_name)
-        return body
 
     # Handle string body
     if isinstance(body, str):
@@ -218,13 +219,21 @@ def generate_tool_from_group(tool_name: str, endpoints: List[Dict], client: Open
                 text=f"Error: {str(e)}"
             )]
 
+    # Create input schema with required fields
+    input_schema = {
+        "type": "object",
+        "title": f"{tool_name}Args",
+        "properties": all_parameters
+    }
+    
+    # Add required fields
+    required_fields = [name for name, schema in all_parameters.items() if schema.get('required')]
+    if required_fields:
+        input_schema["required"] = required_fields
+    
     return {
         'description': description,
-        'input_schema': {
-            "type": "object",
-            "title": f"{tool_name}Args",
-            "properties": all_parameters
-        },
+        'input_schema': input_schema,
         'function': tool_func,
         'args_model': args_model,
         'min_version': min_version,
