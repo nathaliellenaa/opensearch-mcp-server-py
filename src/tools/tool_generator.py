@@ -13,8 +13,8 @@ from typing import Any, Dict, List
 
 # Constants
 BASE_URL = 'https://raw.githubusercontent.com/opensearch-project/opensearch-api-specification/refs/heads/main/spec/namespaces'
-SPEC_FILES = ['cluster.yaml', 'indices.yaml', '_core.yaml']
-SUPPORTED_OPERATIONS = ['msearch', 'explain', 'indices.create', 'count', 'cluster.health']
+SPEC_FILES = ['cluster.yaml', '_core.yaml']
+SUPPORTED_OPERATIONS = ['msearch', 'explain', 'count', 'cluster.health']
 
 
 async def fetch_github_spec(file_name: str) -> Dict:
