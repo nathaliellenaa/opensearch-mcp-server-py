@@ -376,13 +376,13 @@ export OPENSEARCH_SETTINGS_ALLOW_WRITE=false
 ```
 
 ### Important Notes
--Tool names are case-insensitive
+- Tool names are case-insensitive
 - All configuration fields are optional
 - Priority order (highest to lowest):
-    - enable_tools/disable_tools
-    - enable_categories/disable_categories
-    - enabled_tools_regex/disabled_tools_regex
-- When both config file and environment variables are provided, the config file takes precedence
+    - `enable_tools`/`disable_tools`
+    - `enable_categories`/`disable_categories`
+    - `enabled_tools_regex`/`disabled_tools_regex`
+- When both config file and environment variables are provided, the config file will be prioritized
 
 ## LangChain Integration
 
