@@ -326,6 +326,7 @@ We provide a sample [`example_filter.yml`](example_filter.yml) that demonstrates
 ### Configuration Methods
 
 1. YAML Configuration File
+
 Create a YAML file with your tool filtering configuration:
 ```yaml
 # Define custom tool categories
@@ -350,6 +351,16 @@ tool_filters:
   settings:
     allow_read: true   # Enable read-only operations
     allow_write: true  # Enable write-only operations
+```
+
+To use your configuration file, start the server with the `--config` flag:
+
+```bash
+# Run stdio server with tool filter config file
+python -m mcp_server_opensearch --config path/to/config.yml
+
+# Run SSE server with tool filter config file
+python -m mcp_server_opensearch --transport sse --config path/to/config.yml
 ```
 
 2. Environment Variables
