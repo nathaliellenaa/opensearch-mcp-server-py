@@ -13,8 +13,8 @@ from typing import Any, Dict, List
 
 # Constants
 BASE_URL = 'https://raw.githubusercontent.com/opensearch-project/opensearch-api-specification/refs/heads/main/spec/namespaces'
-SPEC_FILES = ['cluster.yaml', '_core.yaml']
-SUPPORTED_OPERATIONS = ['msearch', 'explain', 'count', 'cluster.health']
+SPEC_FILES = ['cluster.yaml', 'indices.yaml', '_core.yaml']
+SUPPORTED_OPERATIONS = ['msearch', 'explain', 'indices.create', 'count', 'cluster.health']
 
 
 async def fetch_github_spec(file_name: str) -> Dict:
@@ -159,6 +159,10 @@ def generate_tool_from_group(base_name: str, endpoints: List[Dict]) -> Dict[str,
     min_version = details.get('x-version-added', '0.0.0')
     max_version = details.get('x-version-deprecated', '99.99.99')
 
+    # Get the HTTP method(s) used by the endpoints
+    methods = set(endpoint['method'].upper() for endpoint in endpoints)
+    http_methods = ", ".join(sorted(methods))
+
     all_parameters, path_parameters = extract_parameters(endpoints)
     # Create Pydantic model for arguments
     field_definitions = {
@@ -237,6 +241,7 @@ def generate_tool_from_group(base_name: str, endpoints: List[Dict]) -> Dict[str,
         'args_model': args_model,
         'min_version': min_version,
         'max_version': max_version,
+        'http_methods': http_methods,
     }
 
 

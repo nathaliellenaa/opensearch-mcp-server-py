@@ -27,9 +27,9 @@ async def create_mcp_server(mode: str = 'single', profile: str = '', config: str
         load_clusters_from_yaml(config)
 
     server = Server('opensearch-mcp-server')
-    # Call tool generator
+    # Call tool generator and tool fitler
     await generate_tools_from_openapi()
-    enabled_tools = get_tools(mode)
+    enabled_tools = get_tools(mode, config)
     logging.info(f'Enabled tools: {list(enabled_tools.keys())}')
 
     @server.list_tools()

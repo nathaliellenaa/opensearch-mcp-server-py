@@ -1,0 +1,12 @@
+tool_category:
+  critical:
+    - SearchIndexTool
+    - ExplainTool
+
+tool_filters:
+  enabled_categories:
+    - critical
+  enabled_tools:
+    - clusterhealthtool
+  disabled_tools:
+    - MsearchTool

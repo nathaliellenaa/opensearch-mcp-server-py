@@ -9,6 +9,7 @@
 - [Server Modes](#server-modes)
 - [Authentication](#authentication)
 - [Running the Server](#running-the-server)
+- [Tool Filter](#tool-filter)
 - [LangChain Integration](#langchain-integration)
 
 ## Overview
@@ -315,6 +316,73 @@ python -m mcp_server_opensearch --mode multi --config clusters.yml --profile my-
 # Fallback to single mode behavior (no config file)
 python -m mcp_server_opensearch --mode multi
 ```
+
+## Tool Filter
+
+OpenSearch MCP server supports tool filtering to enable/disable specific tools by name, category, or operation type. You can configure filtering using either a YAML configuration file or environment variables.
+
+We provide a sample [`example_filter.yml`](example_filter.yml) that demonstrates basic configuration structure, including a "critical" category containing essential operation tools. This sample configuration serves as a starting point that you can customize based on your specific requirements.
+
+### Configuration Methods
+
+1. YAML Configuration File
+Create a YAML file with your tool filtering configuration:
+```yaml
+# Define custom tool categories
+tool_category:
+  <category_name>:
+    - <tool_name>
+
+# Configure tool filters
+tool_filters:
+  enabled_tools:
+    - <tool_name_to_enable>
+  disabled_tools:
+    - <tool_name_to_disable>
+  enabled_categories:
+    - <category_name_to_enable>
+  disabled_categories:
+    - <category_name_to_disable>
+  enabled_tools_regex:
+    - <regex_pattern_to_enable>   # (e.g., search.*)
+  disabled_tools_regex:
+    - <regex_pattern_to_disable>  # (e.g., get.*)
+  settings:
+    allow_read: true   # Enable read-only operations
+    allow_write: true  # Enable write-only operations
+```
+
+2. Environment Variables
+Set environment variables for tool filtering:
+```bash
+# Tool Categories
+export OPENSEARCH_TOOL_CATEGORIES='{"<name_of_category>":["<tool_name>","<tool_name>"]}'
+
+# Enable/Disable Specific Tools
+export OPENSEARCH_ENABLED_TOOLS="<tool_name>,<tool_name>"
+export OPENSEARCH_DISABLED_TOOLS="<tool_name>"
+
+# Enable/Disable Categories
+export OPENSEARCH_ENABLED_CATEGORIES="<category_name>"
+export OPENSEARCH_DISABLED_CATEGORIES="<category_name>"
+
+# Regex Patterns
+export OPENSEARCH_ENABLED_TOOLS_REGEX="<regex_pattern>"
+export OPENSEARCH_DISABLED_TOOLS_REGEX="<regex_pattern>"
+
+# Operation Settings
+export OPENSEARCH_SETTINGS_ALLOW_READ=true
+export OPENSEARCH_SETTINGS_ALLOW_WRITE=false
+```
+
+### Important Notes
+-Tool names are case-insensitive
+- All configuration fields are optional
+- Priority order (highest to lowest):
+    - enable_tools/disable_tools
+    - enable_categories/disable_categories
+    - enabled_tools_regex/disabled_tools_regex
+- When both config file and environment variables are provided, the config file takes precedence
 
 ## LangChain Integration
 

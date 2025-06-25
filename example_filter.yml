@@ -1,0 +1,25 @@
+# Custom tool categories
+tool_category:
+  # critical category with tools required for basic operation
+  critical:
+    - ListIndexTool
+    - SearchIndexTool
+    - IndexMappingTool
+
+# Configure tool filters
+tool_filters:
+  enabled_categories:
+    - critical
+  # disabled_categories:
+  #   - <category_name_to_disable>
+  # enabled_tools:
+  #   - <tool_name_to_enable>
+  # disabled_tools:
+  #   - <tool_name_to_disable>
+  # enabled_tools_regex:
+  #   - <regex_pattern_to_enable>
+  # disabled_tools_regex:
+  #   - <regex_pattern_to_disable>
+  # settings:
+  #   allow_read: true
+  #   allow_write: false

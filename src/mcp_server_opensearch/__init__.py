@@ -32,7 +32,7 @@ def main() -> None:
     parser.add_argument(
         '--profile', default='', help='AWS profile to use for OpenSearch connection'
     )
-    parser.add_argument('--config', default='', help='YAML file containing cluster information')
+    parser.add_argument('--config', default='', help='Path to a YAML configuration file')
 
     args = parser.parse_args()
 

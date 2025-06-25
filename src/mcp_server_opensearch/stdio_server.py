@@ -23,9 +23,9 @@ async def serve(mode: str = 'single', profile: str = '', config: str = '') -> No
     if mode == 'multi':
         load_clusters_from_yaml(config)
 
-    # Call tool generator
+    # Call tool generator and tool filter
     await generate_tools_from_openapi()
-    enabled_tools = get_tools(mode)
+    enabled_tools = get_tools(mode, config)
     logging.info(f'Enabled tools: {list(enabled_tools.keys())}')
 
     @server.list_tools()

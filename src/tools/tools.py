@@ -99,23 +99,27 @@ TOOL_REGISTRY = {
         'function': list_indices_tool,
         'args_model': ListIndicesArgs,
         'min_version': '1.0.0',
+        'http_methods': 'GET',
     },
     'IndexMappingTool': {
         'description': 'Retrieves index mapping and setting information for an index in OpenSearch',
         'input_schema': GetIndexMappingArgs.model_json_schema(),
         'function': get_index_mapping_tool,
         'args_model': GetIndexMappingArgs,
+        'http_methods': 'GET',
     },
     'SearchIndexTool': {
         'description': 'Searches an index using a query written in query domain-specific language (DSL) in OpenSearch',
         'input_schema': SearchIndexArgs.model_json_schema(),
         'function': search_index_tool,
         'args_model': SearchIndexArgs,
+        'http_methods': 'GET, POST',
     },
     'GetShardsTool': {
         'description': 'Gets information about shards in OpenSearch',
         'input_schema': GetShardsArgs.model_json_schema(),
         'function': get_shards_tool,
         'args_model': GetShardsArgs,
+        'http_methods': 'GET',
     },
 }

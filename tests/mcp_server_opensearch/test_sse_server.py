@@ -53,7 +53,7 @@ class TestMCPServer:
 
         assert server.name == 'opensearch-mcp-server'
         mock_generate_tools.assert_called_once()
-        mock_get_tools.assert_called_once_with('single')
+        mock_get_tools.assert_called_once_with('single', '')
 
     @pytest.mark.asyncio
     @patch('mcp_server_opensearch.sse_server.get_tools')
