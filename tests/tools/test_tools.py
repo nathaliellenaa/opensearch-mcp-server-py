@@ -50,6 +50,7 @@ class TestTools:
         self._get_shards_tool = get_shards_tool
 
     def teardown_method(self):
+        """Cleanup after each test method."""
         self.init_client_patcher.stop()
 
     @pytest.mark.asyncio
@@ -180,7 +181,7 @@ class TestTools:
         self.mock_client.cat.shards.assert_called_once_with(index='test-index', format='json')
 
     def test_tool_registry(self):
-        """Test TOOL_REGISTRY structure"""
+        """Test TOOL_REGISTRY structure."""
         expected_tools = ['ListIndexTool', 'IndexMappingTool', 'SearchIndexTool', 'GetShardsTool']
 
         for tool in expected_tools:
@@ -191,7 +192,7 @@ class TestTools:
             assert 'args_model' in self.TOOL_REGISTRY[tool]
 
     def test_input_models(self):
-        """Test input models validation"""
+        """Test input models validation."""
         with pytest.raises(ValueError):
             self.GetIndexMappingArgs()  # Should fail without index
 

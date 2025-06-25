@@ -209,8 +209,8 @@ clusters:
         """Test loading from file with permission error."""
         # Skip this test on Windows as os.chmod with 0o000 doesn't work reliably
         if platform.system() == 'Windows':
-            pytest.skip("Permission test not reliable on Windows")
-            
+            pytest.skip('Permission test not reliable on Windows')
+
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
             f.write('clusters: {}')
             f.flush()

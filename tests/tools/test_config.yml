@@ -4,9 +4,7 @@ tool_category:
     - ExplainTool
 
 tool_filters:
-  enabled_categories:
+  disabled_categories:
     - critical
-  enabled_tools:
-    - clusterhealthtool
   disabled_tools:
     - MsearchTool
