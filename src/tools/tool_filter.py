@@ -12,12 +12,38 @@ from .utils import (
     is_tool_compatible,
     parse_comma_separated,
     load_yaml_config,
-    process_categories,
-    process_regex_patterns,
     validate_tools,
-    apply_write_filter,
 )
 from opensearch.helper import get_opensearch_version
+
+
+def process_regex_patterns(regex_list, tool_names):
+    """Process regex patterns and return matching tool names."""
+    matching_tools = []
+    for regex in regex_list:
+        for tool_name in tool_names:
+            if re.match(regex, tool_name, re.IGNORECASE):
+                matching_tools.append(tool_name)
+    return matching_tools
+
+
+def apply_write_filter(registry):
+    """Apply allow_write filters to the registry."""
+    for tool_name in list(registry.keys()):
+        http_methods = registry[tool_name].get('http_methods', [])
+        if 'GET' not in http_methods:
+            registry.pop(tool_name, None)
+
+
+def process_categories(category_list, category_to_tools):
+    """Process categories and return tools from those categories."""
+    tools = []
+    for category in category_list:
+        if category in category_to_tools:
+            tools.extend(category_to_tools[category])
+        else:
+            logging.warning(f"Category '{category}' not found in tool categories")
+    return tools
 
 
 def process_tool_filter(
@@ -84,7 +110,7 @@ def process_tool_filter(
 
         # Apply allow_write filter first
         if not allow_write:
-            apply_write_filter(TOOL_REGISTRY, allow_write)
+            apply_write_filter(TOOL_REGISTRY)
 
         # Process tools from categories and regex patterns
         disabled_tools_from_categories = process_categories(

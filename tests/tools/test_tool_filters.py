@@ -370,10 +370,12 @@ class TestProcessToolFilter:
         assert "Ignoring invalid tool from 'disabled_tools': 'InvalidTool'" in caplog.text
         assert "Ignoring invalid tool from 'disabled_tools': 'exampletool'" in caplog.text
 
-    def test_apply_write_filter(self):
+    def test_apply_write_filter(self, monkeypatch):
         """Test that apply write filter are applied correctly."""
         tool_registry_copy = self.tool_registry.copy()
-        self.apply_write_filter(tool_registry_copy, False)
+
+        monkeypatch.setenv('OPENSEARCH_SETTINGS_ALLOW_WRITE', False)
+        self.apply_write_filter(tool_registry_copy)
         assert 'ListIndexTool' in tool_registry_copy
         assert 'SearchIndexTool' in tool_registry_copy
         assert 'IndicesCreateTool' not in tool_registry_copy
