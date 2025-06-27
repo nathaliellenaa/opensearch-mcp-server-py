@@ -20,4 +20,5 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Fix AWS auth requiring `AWS_REGION` environment variable to be set, will now support using region set via `~/.aws/config` ([#28](https://github.com/opensearch-project/opensearch-mcp-server-py/pull/28))
 - Fix OpenSearch client to use refreshable credentials ([#13](https://github.com/opensearch-project/opensearch-mcp-server-py/pull/13))
 - fix publish release ci and bump version on main ([#49](https://github.com/opensearch-project/opensearch-mcp-server-py/pull/49))
+- fix OpenAPI tools schema, handle NDJSON ([#52](https://github.com/opensearch-project/opensearch-mcp-server-py/pull/52))
 ### Security

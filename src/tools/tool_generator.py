@@ -18,6 +18,11 @@ BASE_URL = 'https://raw.githubusercontent.com/opensearch-project/opensearch-api-
 SPEC_FILES = ['cluster.yaml', '_core.yaml']
 SUPPORTED_OPERATIONS = ['msearch', 'explain', 'count', 'cluster.health']
 
+BODY_DESCRIPTIONS = {
+    'msearch': 'Request body as NDJSON format: alternating lines of header and query objects ending with \\n. Alternatively, pass a JSON array [header, query, header, query, ...] and the tool will convert it to NDJSON for you.',
+    'explain': 'Request body containing the query to explain.',
+}
+
 
 async def fetch_github_spec(file_name: str) -> Dict:
     """Fetch OpenSearch API specification from GitHub asynchronously."""
@@ -59,12 +64,13 @@ def group_endpoints_by_operation(paths: Dict[str, Dict]) -> Dict[str, List[Dict]
     return grouped_ops
 
 
-def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set]:
+def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set, set]:
     """Extract parameters from endpoints."""
     # Add baseToolArgs to all tools, will be filtered out later in single mode
     base_schema = baseToolArgs.model_json_schema()
     all_parameters = base_schema.get('properties', {})
     path_parameters = set()
+    required_parameters = set()
 
     # Track which path parameters appear in which endpoints
     param_to_endpoints = {}
@@ -95,57 +101,72 @@ def extract_parameters(endpoints: list[dict]) -> tuple[dict[str, dict], set]:
                     'type': param_schema.get('type', 'string'),
                     'description': param.get('description', ''),
                 }
+                # Check if the parameter is required according to the OpenAPI spec
+                if param.get('required', False):
+                    required_parameters.add(param_name)
 
+        op_group = endpoints[0]['details'].get('x-operation-group', '')
         # Add body parameter if needed
         if 'requestBody' in details:
             all_parameters['body'] = {
                 'title': 'Body',
-                'description': 'Request body',
+                'description': BODY_DESCRIPTIONS.get(op_group, 'Request body'),
             }
 
-    # Mark parameters as required if they appear in all endpoints
+    # Mark path parameters as required only if they appear in all endpoints
     for param, endpoint_indices in param_to_endpoints.items():
         if len(endpoint_indices) == len(endpoints):
-            all_parameters[param]['required'] = True
+            required_parameters.add(param)
 
     # Mark body as required for ExplainTool and MsearchTool
     # TODO: Remove hard-coded logic once we found a better way to determine required request body
-    op_group = endpoints[0]['details'].get('x-operation-group', '')
     if op_group in ['explain', 'msearch'] and 'body' in all_parameters:
-        all_parameters['body']['required'] = True
-    return all_parameters, path_parameters
+        required_parameters.add('body')
+
+    return all_parameters, path_parameters, required_parameters
 
 
 def process_body(body: Any, tool_name: str) -> Any:
-    """Process request body based on tool type and format."""
+    """Process request body based on tool type and format.
+
+    Args:
+        body: The request body to process
+        tool_name: Name of the tool (e.g., 'MsearchTool')
+
+    Returns:
+        Processed body in the appropriate format for the tool
+    """
     if body is None:
         return None
 
     # Handle string body
     if isinstance(body, str):
         # Multi search tool (msearch) requires request body to be in NDJSON format
-        if tool_name == 'Msearch':
+        if tool_name == 'MsearchTool':
             try:
                 # Check if it's a JSON array string
                 parsed = json.loads(body)
                 if isinstance(parsed, list):
                     # Convert JSON array to NDJSON format
-                    ndjson = ''
-                    for item in parsed:
-                        ndjson += json.dumps(item) + '\n'
-                    return ndjson
-                return body if body.endswith('\n') else body + '\n'
+                    return ''.join(json.dumps(item) + '\n' for item in parsed)
             except json.JSONDecodeError:
-                # If not valid JSON, treat as NDJSON
-                return body if body.endswith('\n') else body + '\n'
+                pass  # Fall through to treat as NDJSON
+            # Treat as NDJSON string - ensure it ends with newline
+            return body if body.endswith('\n') else body + '\n'
 
         # For other tools, parse JSON string to object
         if body.strip():
             try:
                 return json.loads(body)
             except json.JSONDecodeError:
-                raise ValueError('Invalid JSON in body parameter')
+                raise ValueError(f'Invalid JSON in body parameter: {str(body)[:100]}...')
         return None
+
+    # Handle non-string body (list, dict, etc.)
+    if isinstance(body, list) and tool_name == 'MsearchTool':
+        # Direct JSON array (from MCP tools)
+        return ''.join(json.dumps(item) + '\n' for item in body)
+
     return body
 
 
@@ -179,7 +200,7 @@ def generate_tool_from_group(base_name: str, endpoints: List[Dict]) -> Dict[str,
     methods = set(endpoint['method'].upper() for endpoint in endpoints)
     http_methods = ', '.join(sorted(methods))
 
-    all_parameters, path_parameters = extract_parameters(endpoints)
+    all_parameters, path_parameters, required_parameters = extract_parameters(endpoints)
     # Create Pydantic model for arguments
     field_definitions = {
         name: (Any if name == 'body' else str, info.get('default'))
@@ -246,7 +267,7 @@ def generate_tool_from_group(base_name: str, endpoints: List[Dict]) -> Dict[str,
     input_schema = {'type': 'object', 'title': f'{base_name}Args', 'properties': all_parameters}
 
     # Add required fields
-    required_fields = [name for name, schema in all_parameters.items() if schema.get('required')]
+    required_fields = list(required_parameters)
     if required_fields:
         input_schema['required'] = required_fields
 

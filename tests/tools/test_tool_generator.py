@@ -109,7 +109,7 @@ class TestToolGenerator:
                 endpoints.append({'path': path, 'method': method, 'details': details})
 
         # Call the function
-        all_parameters, path_parameters = self.extract_parameters(endpoints)
+        all_parameters, path_parameters, required_parameters = self.extract_parameters(endpoints)
 
         # Verify results
         assert 'opensearch_cluster_name' in all_parameters
@@ -135,7 +135,7 @@ class TestToolGenerator:
 
         # Test with msearch NDJSON
         body = '{"index":"test"}\n{"query":{"match_all":{}}}'
-        result = self.process_body(body, 'Msearch')
+        result = self.process_body(body, 'MsearchTool')
         assert result.endswith('\n')
 
         # Test with JSON string
@@ -146,7 +146,7 @@ class TestToolGenerator:
 
         # Test with JSON array for msearch
         body = '[{"index":"test"},{"query":{"match_all":{}}}]'
-        result = self.process_body(body, 'Msearch')
+        result = self.process_body(body, 'MsearchTool')
         assert result.endswith('\n')
         assert '{"index": "test"}\n{"query": {"match_all": {}}}' in result
 
