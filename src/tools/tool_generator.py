@@ -172,15 +172,26 @@ def process_body(body: Any, tool_name: str) -> Any:
 
 def select_endpoint(endpoints: list[dict], params: dict) -> dict:
     """Select the most appropriate endpoint based on parameters."""
-    # Try to find endpoint matching all parameters
-    for endpoint in endpoints:
+    # Sort endpoints by number of path parameters (most specific first)
+    sorted_endpoints = sorted(
+        endpoints,
+        key=lambda ep: sum(
+            1
+            for p in ep['path'].split('/')
+            if p.startswith('{') and p.endswith('}') and p[1:-1] in params
+        ),
+        reverse=True,
+    )
+
+    # Return the first endpoint where all required path parameters are provided
+    for endpoint in sorted_endpoints:
         path_params = [
             p[1:-1] for p in endpoint['path'].split('/') if p.startswith('{') and p.endswith('}')
         ]
         if all(param in params for param in path_params):
             return endpoint
 
-    # Fall back to simplest endpoint
+    # Fall back to simplest endpoint or first endpoint
     return next(
         (ep for ep in endpoints if not any('{' in p for p in ep['path'].split('/'))), endpoints[0]
     )
