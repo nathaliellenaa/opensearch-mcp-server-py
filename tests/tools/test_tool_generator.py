@@ -155,14 +155,19 @@ class TestToolGenerator:
         # Setup test endpoints
         endpoints = [
             {
-                'path': '/_cluster/health/{index}',
+                'path': '/_cluster/health',
                 'method': 'get',
                 'details': {'description': 'Returns cluster health for index'},
             },
             {
-                'path': '/_cluster/health',
+                'path': '/_cluster/health/{index}',
                 'method': 'get',
                 'details': {'description': 'Returns cluster health'},
+            },
+            {
+                'path': '/_cluster/health/{index}/{shard}',
+                'method': 'get',
+                'details': {'description': 'Returns cluster health for specific shard'},
             },
         ]
 
@@ -173,6 +178,22 @@ class TestToolGenerator:
 
         # Test case 2: Without index parameter - should select the simpler endpoint
         params = {}
+        selected = self.select_endpoint(endpoints, params)
+        assert selected['path'] == '/_cluster/health'
+
+        # Test case 3: With both index and shard parameters - should select the most specific endpoint
+        params = {'index': 'test-index', 'shard': '0'}
+        selected = self.select_endpoint(endpoints, params)
+        assert selected['path'] == '/_cluster/health/{index}/{shard}'
+
+        # Test case 4: With index and extra parameters - should still select the index endpoint
+        params = {'index': 'test-index', 'other_param': 'value'}
+        selected = self.select_endpoint(endpoints, params)
+        assert selected['path'] == '/_cluster/health/{index}'
+
+        # Test case 5: With shard but no index - should select the base endpoint
+        # since the shard endpoint requires index parameter
+        params = {'shard': '0'}
         selected = self.select_endpoint(endpoints, params)
         assert selected['path'] == '/_cluster/health'
 
