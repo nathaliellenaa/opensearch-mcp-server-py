@@ -71,17 +71,7 @@ Configure `claude_desktop_config.json` from Settings > Developer. See [here](htt
   }
 }
 ```
-
-**Supported Environment Variables for Single Mode:**
-- `OPENSEARCH_URL` (required): Your OpenSearch cluster endpoint
-- `OPENSEARCH_USERNAME` & `OPENSEARCH_PASSWORD`: For basic authentication
-- `AWS_IAM_ARN`: For IAM role authentication
-- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`: For AWS credentials
-- `AWS_REGION`: The AWS region of the cluster
-- `AWS_OPENSEARCH_SERVERLESS`: Set to "true" for OpenSearch Serverless
-- `AWS_PROFILE`: AWS profile name (optional)
-- `OPENSEARCH_SSL_VERIFY`: Control SSL certificate verification (default: "true", set to "false" to disable)
-
+See [Environment Variables](#environment-variables) for supported environment variables. 
 See [Authentication](#authentication) section for detailed authentication setup.
 
 #### Multi Mode (For Multiple Clusters)
@@ -124,6 +114,13 @@ clusters:
   staging:
     opensearch_url: "https://staging-opensearch.us-west-2.es.amazonaws.com"
     profile: "staging"
+  
+  serverless-cluster:
+    opensearch_url: "https://collection-id.us-east-1.aoss.amazonaws.com"
+    aws_region: "us-east-1"
+    profile: "your-aws-profile"
+    is_serverless: true
+
 ```
 
 **Key Points about Multi Mode:**
@@ -222,11 +219,10 @@ export AWS_SESSION_TOKEN="<your_aws_session_token>"
 #### OpenSearch Serverless
 ```bash
 export OPENSEARCH_URL="<your_opensearch_serverless_endpoint>"
-export AWS_OPENSEARCH_SERVERLESS=true
+export AWS_OPENSEARCH_SERVERLESS="true"
 export AWS_REGION="<your_aws_region>"
-export AWS_ACCESS_KEY_ID="<your_aws_access_key>"
-export AWS_SECRET_ACCESS_KEY="<your_aws_secret_access_key>"
-export AWS_SESSION_TOKEN="<your_aws_session_token>"
+# Use either AWS credentials or profile
+export AWS_PROFILE="<your_aws_profile>"
 ```
 
 ### Multi Mode Authentication
@@ -255,6 +251,13 @@ clusters:
     iam_arn: "arn:aws:iam::123456789012:role/YourOpenSearchRole"
     aws_region: "us-east-2"
     profile: "your-aws-profile"
+
+  # OpenSearch Serverless
+  serverless-cluster:
+    opensearch_url: "https://collection-id.us-east-1.aoss.amazonaws.com"
+    aws_region: "us-east-1"
+    profile: "your-aws-profile"
+    is_serverless: true
 ```
 
 #### Authentication Methods in Multi Mode:
@@ -323,6 +326,77 @@ python -m mcp_server_opensearch --mode multi --config clusters.yml --profile my-
 python -m mcp_server_opensearch --mode multi
 ```
 
+## Command Line Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--transport` | string | `stdio` | Transport type: `stdio` or `stream` |
+| `--host` | string | `0.0.0.0` | Host to bind to (streaming only) |
+| `--port` | integer | `9900` | Port to listen on (streaming only) |
+| `--mode` | string | `single` | Server mode: `single` or `multi` |
+| `--profile` | string | `''` | AWS profile to use for OpenSearch connection |
+| `--config` | string | `''` | Path to a YAML configuration file |
+
+## Environment Variables
+
+### Connection & Authentication Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENSEARCH_URL` | Yes* | `''` | OpenSearch cluster endpoint URL |
+| `OPENSEARCH_USERNAME` | No | `''` | Username for basic authentication |
+| `OPENSEARCH_PASSWORD` | No | `''` | Password for basic authentication |
+| `AWS_IAM_ARN` | No | `''` | IAM role ARN for role-based authentication |
+| `AWS_REGION` | No | `''` | AWS region for the OpenSearch cluster |
+| `AWS_ACCESS_KEY_ID` | No | `''` | AWS access key ID |
+| `AWS_SECRET_ACCESS_KEY` | No | `''` | AWS secret access key |
+| `AWS_SESSION_TOKEN` | No | `''` | AWS session token |
+| `AWS_PROFILE` | No | `''` | AWS profile name |
+| `AWS_OPENSEARCH_SERVERLESS` | No | `''` | Set to `"true"` for OpenSearch Serverless |
+
+### SSL & Security Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENSEARCH_SSL_VERIFY` | No | `"true"` | Control SSL certificate verification (`"true"` or `"false"`) |
+
+### Tool Filtering Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENSEARCH_DISABLED_TOOLS` | No | `''` | Comma-separated list of disabled tool names |
+| `OPENSEARCH_TOOL_CATEGORIES` | No | `''` | JSON string defining tool categories |
+| `OPENSEARCH_DISABLED_CATEGORIES` | No | `''` | Comma-separated list of disabled category names |
+| `OPENSEARCH_DISABLED_TOOLS_REGEX` | No | `''` | Comma-separated list of regex patterns for disabled tools |
+| `OPENSEARCH_SETTINGS_ALLOW_WRITE` | No | `"true"` | Enable/disable write operations (`"true"` or `"false"`) |
+
+*Required in single mode or when not using multi-mode config file
+
+## Multi-Mode Cluster Configuration
+
+When using multi-mode, each cluster in your YAML configuration file accepts the following parameters:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `opensearch_url` | string | Yes | OpenSearch cluster endpoint URL |
+| `opensearch_username` | string | No* | Username for basic authentication |
+| `opensearch_password` | string | No* | Password for basic authentication |
+| `iam_arn` | string | No* | IAM role ARN for role-based authentication |
+| `aws_region` | string | No* | AWS region for the OpenSearch cluster |
+| `profile` | string | No | AWS profile name |
+| `is_serverless` | boolean | No | Set to `true` for OpenSearch Serverless |
+
+*Required for respective authentication method (basic auth, IAM role, or AWS credentials)
+
+### Authentication Method Requirements
+
+| Authentication Method | Required Parameters | Optional Parameters |
+|----------------------|-------------------|-------------------|
+| **Basic Authentication** | `opensearch_url`, `opensearch_username`, `opensearch_password` | `profile` |
+| **IAM Role Authentication** | `opensearch_url`, `iam_arn`, `aws_region` | `profile` |
+| **AWS Credentials Authentication** | `opensearch_url` | `aws_region`, `profile` |
+| **OpenSearch Serverless** | `opensearch_url`, `aws_region` | `profile`, `is_serverless: true` |
+
 ## Tool Filter
 
 OpenSearch MCP server supports tool filtering to disable specific tools by name, category, or operation type. You can configure filtering using either a YAML configuration file or environment variables.
@@ -384,6 +458,7 @@ export OPENSEARCH_SETTINGS_ALLOW_WRITE=true
 - Tool names are case-insensitive
 - All configuration fields are optional
 - When both config file and environment variables are provided, the config file will be prioritized
+- Tool filtering is only supported in single mode. In multi mode, tool filtering is not supported
 
 ## LangChain Integration
 

@@ -17,6 +17,7 @@ class ClusterInfo(BaseModel):
     opensearch_username: Optional[str] = None
     opensearch_password: Optional[str] = None
     profile: Optional[str] = None
+    is_serverless: Optional[bool] = None
 
 
 # Global dictionary to store cluster information
@@ -99,6 +100,7 @@ def load_clusters_from_yaml(file_path: str) -> None:
                     opensearch_username=cluster_config.get('opensearch_username', None),
                     opensearch_password=cluster_config.get('opensearch_password', None),
                     profile=cluster_config.get('profile', None),
+                    is_serverless=cluster_config.get('is_serverless', None),
                 )
                 # Check if possible to connect to the cluster
                 is_connected, error_message = check_cluster_connection(cluster_info)
@@ -141,7 +143,7 @@ def check_cluster_connection(cluster_info: ClusterInfo) -> tuple[bool, str]:
         from opensearch.client import initialize_client_with_cluster
 
         client = initialize_client_with_cluster(cluster_info)
-        client.info()
+        client.ping()
         return True, ''
     except Exception as e:
         return False, str(e)

@@ -197,7 +197,9 @@ def get_tools(mode: str = 'single', config: str = '') -> dict:
     )
 
     # Check if running in OpenSearch Serverless mode
-    is_serverless = os.getenv('AWS_OPENSEARCH_SERVERLESS', '').lower() == 'true'
+    from opensearch.client import is_serverless
+
+    is_serverless = is_serverless(baseToolArgs())
 
     for name, info in TOOL_REGISTRY.items():
         # Create a copy to avoid modifying the original tool info

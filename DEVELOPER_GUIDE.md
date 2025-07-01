@@ -59,9 +59,6 @@ uv run python -m mcp_server_opensearch
 # Run streaming server (SSE/HTTP streaming)
 uv run python -m mcp_server_opensearch --transport stream
 
-# Run with debug logging
-uv run python -m mcp_server_opensearch --log-level debug
-
 # Run with custom AWS profile
 uv run python -m mcp_server_opensearch --profile my-profile
 ```

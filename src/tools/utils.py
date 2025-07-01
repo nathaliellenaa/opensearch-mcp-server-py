@@ -1,7 +1,6 @@
 # Copyright OpenSearch Contributors
 # SPDX-License-Identifier: Apache-2.0
 
-import re
 import logging
 import yaml
 from semver import Version
