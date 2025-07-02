@@ -240,14 +240,14 @@ class TestCheckClusterConnection:
 
         with patch('opensearch.client.initialize_client_with_cluster') as mock_init:
             mock_client = MagicMock()
-            mock_client.info.return_value = {'version': {'number': '2.0.0'}}
+            mock_client.ping.return_value = True
             mock_init.return_value = mock_client
 
             success, error = check_cluster_connection(cluster)
 
             assert success is True
             assert error == ''
-            mock_client.info.assert_called_once()
+            mock_client.ping.assert_called_once()
 
     def test_check_cluster_connection_failure(self):
         """Test failed cluster connection."""
@@ -261,13 +261,13 @@ class TestCheckClusterConnection:
             assert success is False
             assert 'Connection timeout' in error
 
-    def test_check_cluster_connection_client_info_failure(self):
-        """Test cluster connection where client.info() fails."""
+    def test_check_cluster_connection_client_ping_failure(self):
+        """Test cluster connection where client.ping() fails."""
         cluster = ClusterInfo(opensearch_url='https://localhost:9200')
 
         with patch('opensearch.client.initialize_client_with_cluster') as mock_init:
             mock_client = MagicMock()
-            mock_client.info.side_effect = Exception('Authentication failed')
+            mock_client.ping.side_effect = Exception('Authentication failed')
             mock_init.return_value = mock_client
 
             success, error = check_cluster_connection(cluster)

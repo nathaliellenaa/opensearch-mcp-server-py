@@ -20,6 +20,11 @@ from opensearch.helper import (
 
 
 def check_tool_compatibility(tool_name: str, args: baseToolArgs = None):
+    from opensearch.client import is_serverless
+
+    if is_serverless(args):
+        return
+
     opensearch_version = get_opensearch_version(args)
     if not is_tool_compatible(opensearch_version, TOOL_REGISTRY[tool_name]):
         raise Exception(
