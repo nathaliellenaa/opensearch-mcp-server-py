@@ -51,13 +51,15 @@ def load_yaml_config(filter_path):
         return None
 
 
-def validate_tools(tool_list, registry_lookup, source_name):
+def validate_tools(tool_list, display_lookup, source_name):
     """Validate tools against registry and return valid tools."""
     valid_tools = set()
     for tool in tool_list:
         tool_lower = tool.lower()
-        if tool_lower in registry_lookup:
-            valid_tools.add(tool_lower)
+        # Check if it matches tool display name
+        if tool_lower in display_lookup:
+            actual_tool = display_lookup[tool_lower]
+            valid_tools.add(actual_tool.lower())
         else:
             logging.warning(f"Ignoring invalid tool from '{source_name}': '{tool}'")
     return valid_tools

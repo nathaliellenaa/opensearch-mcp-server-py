@@ -9,6 +9,7 @@ import copy
 # A dictionary for mocking TOOL_REGISTRY
 MOCK_TOOL_REGISTRY = {
     'ListIndexTool': {
+        'display_name': 'ListIndexTool',
         'description': 'List indices',
         'input_schema': {'type': 'object', 'properties': {'param1': {'type': 'string'}}},
         'function': MagicMock(),
@@ -17,6 +18,7 @@ MOCK_TOOL_REGISTRY = {
         'max_version': '3.0.0',
     },
     'SearchIndexTool': {
+        'display_name': 'SearchIndexTool',
         'description': 'Search an index',
         'input_schema': {
             'type': 'object',
@@ -162,6 +164,7 @@ class TestGetTools:
         # Create tool with missing properties
         tool_without_properties = {
             'ListIndexTool': {
+                'display_name': 'ListIndexTool',
                 'description': 'List indices',
                 'input_schema': {'type': 'object', 'title': 'ListIndexArgs'},
                 'function': MagicMock(),
@@ -213,13 +216,15 @@ class TestProcessToolFilter:
     def setup_method(self):
         """Set up a fresh copy of the tool registry for each test."""
         self.tool_registry = {
-            'ListIndexTool': {'http_methods': 'GET'},
-            'SearchIndexTool': {'http_methods': 'GET, POST'},
-            'MsearchTool': {'http_methods': 'GET, POST'},
-            'ExplainTool': {'http_methods': 'GET, POST'},
-            'ClusterHealthTool': {'http_methods': 'GET'},
-            'IndicesCreateTool': {'http_methods': 'PUT'},
-            'IndicesStatsTool': {'http_methods': 'GET'},
+            'ListIndexTool': {'display_name': 'ListIndexTool', 'http_methods': 'GET'},
+            'SearchIndexTool': {'display_name': 'SearchIndexTool', 'http_methods': 'GET, POST'},
+            'MsearchTool': {'display_name': 'MsearchTool', 'http_methods': 'GET, POST'},
+            'ExplainTool': {'display_name': 'ExplainTool', 'http_methods': 'GET, POST'},
+            'ClusterHealthTool': {'display_name': 'ClusterHealthTool', 'http_methods': 'GET'},
+            'IndicesCreateTool': {'display_name': 'IndicesCreateTool', 'http_methods': 'PUT'},
+            'IndicesStatsTool': {'display_name': 'IndicesStatsTool', 'http_methods': 'GET'},
+            'CountTool': {'display_name': 'CustomCountTool', 'http_methods': 'GET'},
+            'ListModelTool': {'display_name': 'ModelListTool', 'http_methods': 'GET'},
         }
         self.category_to_tools = {
             'critical': ['SearchIndexTool', 'ExplainTool'],
@@ -269,3 +274,23 @@ class TestProcessToolFilter:
         assert 'MsearchTool' in self.tool_registry
         assert 'SearchIndexTool' not in self.tool_registry  # In disabled_tools_regex
         assert 'ExplainTool' not in self.tool_registry  # In disabled_tools
+
+    def test_process_tool_filter_rename_tool(self):
+        """Test processing tool filtering with tool renaming feature"""
+        process_tool_filter(
+            tool_registry=self.tool_registry,
+            disabled_tools='CountTool',
+            disabled_tools_regex='list.*',
+            allow_write=True
+        )
+        assert 'CountTool' in self.tool_registry  # Renamed to CustomCountTool
+        assert 'ListModelTool' in self.tool_registry  # Renamed to ModelListTool
+
+        process_tool_filter(
+            tool_registry=self.tool_registry,
+            disabled_tools='CustomCountTool', 
+            disabled_tools_regex='model.*',
+            allow_write=True
+        )
+        assert 'CustomCountTool' not in self.tool_registry
+        assert 'ModelListTool' not in self.tool_registry

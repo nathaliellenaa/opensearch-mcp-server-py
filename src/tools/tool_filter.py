@@ -67,8 +67,11 @@ def process_tool_filter(
         tool_registry: The tool registry to filter.
     """
     try:
-        # Create case-insensitive lookup
-        tool_registry_lower = {k.lower(): k for k in tool_registry.keys()}
+        # Create display name lookup
+        display_name = {
+            tool_info.get('display_name', '').lower(): k
+            for k, tool_info in tool_registry.items()
+        }
 
         # Initialize collections
         category_to_tools = {}
@@ -120,7 +123,7 @@ def process_tool_filter(
         )
 
         # Get current tool names after allow_write filtering
-        current_tool_names = list(tool_registry.keys())
+        current_tool_names = [tool['display_name'] for tool in tool_registry.values()]
         disabled_tools_from_regex = process_regex_patterns(
             disabled_tools_regex_list, current_tool_names
         )
@@ -130,17 +133,13 @@ def process_tool_filter(
             # Validate and collect all disabled tools
             all_disabled_tools = set()
             all_disabled_tools.update(
-                validate_tools(disabled_tools_list, tool_registry_lower, 'disabled_tools')
+                validate_tools(disabled_tools_list, display_name, 'disabled_tools')
             )
             all_disabled_tools.update(
-                validate_tools(
-                    disabled_tools_from_categories, tool_registry_lower, 'disabled_categories'
-                )
+                validate_tools(disabled_tools_from_categories, display_name, 'disabled_categories')
             )
             all_disabled_tools.update(
-                validate_tools(
-                    disabled_tools_from_regex, tool_registry_lower, 'disabled_tools_regex'
-                )
+                validate_tools(disabled_tools_from_regex, display_name, 'disabled_tools_regex')
             )
 
             # Remove tools in the disabled list
@@ -150,8 +149,9 @@ def process_tool_filter(
 
         # Log results
         source = filter_path if filter_path else 'environment variables'
+        tool_display_names = [tool['display_name'] for tool in tool_registry.values()]
         logging.info(f'Applied tool filter from {source}')
-        logging.info(f'Available tools after filtering: {list(tool_registry.keys())}')
+        logging.info(f'Available tools after filtering: {tool_display_names}')
 
     except Exception as e:
         logging.error(f'Error processing tool filter: {str(e)}')
@@ -201,9 +201,10 @@ def get_tools(tool_registry: dict, mode: str = 'single', config_file_path: str =
         **{k: v for k, v in env_config.items() if not config_file_path},
     )
 
-    for name, info in TOOL_REGISTRY.items():
+    for name, info in tool_registry.items():
         # Create a copy to avoid modifying the original tool info
         tool_info = info.copy()
+        tool_name = tool_info['display_name']
 
         # If tool is not compatible with the current OpenSearch version, skip, don't enable
         if not is_tool_compatible(version, info):
@@ -218,6 +219,6 @@ def get_tools(tool_registry: dict, mode: str = 'single', config_file_path: str =
                 schema['properties'].pop(field, None)
         tool_info['input_schema'] = schema
 
-        enabled[name] = tool_info
+        enabled[tool_name] = tool_info
 
     return enabled
