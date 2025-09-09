@@ -410,9 +410,12 @@ python -m mcp_server_opensearch --mode multi
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
+| `OPENSEARCH_ENABLED_TOOLS` | No | `''` | Comma-separated list of enabled tool names |
 | `OPENSEARCH_DISABLED_TOOLS` | No | `''` | Comma-separated list of disabled tool names |
 | `OPENSEARCH_TOOL_CATEGORIES` | No | `''` | JSON string defining tool categories |
+| `OPENSEARCH_ENABLED_CATEGORIES` | No | `''` | Comma-separated list of enabled category names |
 | `OPENSEARCH_DISABLED_CATEGORIES` | No | `''` | Comma-separated list of disabled category names |
+| `OPENSEARCH_ENABLED_TOOLS_REGEX` | No | `''` | Comma-separated list of regex patterns for enabled tools |
 | `OPENSEARCH_DISABLED_TOOLS_REGEX` | No | `''` | Comma-separated list of regex patterns for disabled tools |
 | `OPENSEARCH_SETTINGS_ALLOW_WRITE` | No | `"true"` | Enable/disable write operations (`"true"` or `"false"`) |
 
@@ -448,7 +451,7 @@ When using multi-mode, each cluster in your YAML configuration file accepts the 
 
 ## Tool Filter
 
-OpenSearch MCP server supports tool filtering to disable specific tools by name, category, or operation type. You can configure filtering using either a YAML configuration file or environment variables.
+OpenSearch MCP server supports tool filtering to enable or disable specific tools by name, category, or operation type. You can configure filtering using either a YAML configuration file or environment variables. 
 
 **Important Note: Tool filtering is only supported in Single Mode. In Multi Mode, all tools are available without any filtering.**
 
@@ -465,12 +468,18 @@ tool_category:
 
 # Configure tool filters
 tool_filters:
+  enabled_tools:
+    - <tool_name_to_enable>
   disabled_tools:
     - <tool_name_to_disable>
+  enabled_categories:
+    - <category_name_to_enable>
   disabled_categories:
     - <category_name_to_disable>
+  enable_tools_regex:
+    - <regex_pattern_to_enable>  # (e.g., search.*)
   disabled_tools_regex:
-    - <regex_pattern_to_disable>  # (e.g., search.*)
+    - <regex_pattern_to_disable>
   settings:
     allow_write: true  # Enable/disable write-only operations
 ```
@@ -492,13 +501,16 @@ Set environment variables for tool filtering:
 # Tool Categories
 export OPENSEARCH_TOOL_CATEGORIES='{"<name_of_category>":["<tool_name>","<tool_name>"]}'
 
-# Disable Specific Tools
+# Enable/Disable Specific Tools
+export OPENSEARCH_ENABLED_TOOLS="<tool_name>"
 export OPENSEARCH_DISABLED_TOOLS="<tool_name>"
 
-# Disable Categories
+# Enable/Disable Categories
+export OPENSEARCH_ENABLED_CATEGORIES="<category_name>"
 export OPENSEARCH_DISABLED_CATEGORIES="<category_name>"
 
 # Regex Pattern
+export OPENSEARCH_ENABLED_TOOLS_REGEX="<regex_pattern>"
 export OPENSEARCH_DISABLED_TOOLS_REGEX="<regex_pattern>"
 
 # Operation Settings

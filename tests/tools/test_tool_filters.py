@@ -232,34 +232,30 @@ class TestProcessToolFilter:
             'admin': ['ClusterHealthTool', 'IndicesStatsTool'],
         }
 
-    def test_process_tool_filter_config(self, caplog):
+    def test_process_tool_filter_config(self):
         """Test processing tool filter from a YAML config file."""
-        import logging
-
-        caplog.set_level(logging.INFO)
-
         process_tool_filter(
             tool_registry=self.tool_registry,
             filter_path='tests/tools/test_config.yml',
             tool_categories=self.category_to_tools,
         )
 
-        # Check the results
+        # Core tools, enabled by default
         assert 'ClusterHealthTool' in self.tool_registry
         assert 'ListIndexTool' in self.tool_registry
-        assert 'MsearchTool' not in self.tool_registry
-        # These tools are in the 'critical' category which is disabled in test_config.yml
-        assert 'SearchIndexTool' not in self.tool_registry
-        assert 'ExplainTool' not in self.tool_registry
-        # This tool is in the 'admin' category which is not disabled
+
+        # Non-core tools, but enabled in test_config.yml
         assert 'IndicesStatsTool' in self.tool_registry
 
-    def test_process_tool_filter_env(self, caplog):
+        # Core tools, but disabled in test_config.yml
+        assert 'MsearchTool' not in self.tool_registry
+
+        # Tools are in the 'critical' category which is disabled in test_config.yml
+        assert 'SearchIndexTool' not in self.tool_registry
+        assert 'ExplainTool' not in self.tool_registry
+
+    def test_process_tool_filter_env(self):
         """Test processing tool filter from environment variables."""
-        import logging
-
-        caplog.set_level(logging.INFO)
-
         # Call the function with environment variables
         process_tool_filter(
             tool_registry=self.tool_registry,
@@ -268,18 +264,24 @@ class TestProcessToolFilter:
             allow_write=True,
         )
 
-        # Check the results
+        # Core tools, enabled by default
         assert 'ListIndexTool' in self.tool_registry
         assert 'ClusterHealthTool' in self.tool_registry
-        assert 'IndicesCreateTool' in self.tool_registry
         assert 'MsearchTool' in self.tool_registry
-        assert 'SearchIndexTool' not in self.tool_registry  # In disabled_tools_regex
-        assert 'ExplainTool' not in self.tool_registry  # In disabled_tools
+
+        # Non-core tools, disabled by default
+        assert 'IndicesCreateTool' not in self.tool_registry
+        assert 'IndicesStatsTool' not in self.tool_registry
+
+        # In disabled_tools_regex and disabled_tools
+        assert 'SearchIndexTool' not in self.tool_registry
+        assert 'ExplainTool' not in self.tool_registry
 
     def test_process_tool_filter_rename_tool(self):
         """Test processing tool filtering with tool renaming feature"""
         process_tool_filter(
             tool_registry=self.tool_registry,
+            enabled_tools='ModelListTool',
             disabled_tools='CountTool',
             disabled_tools_regex='list.*',
             allow_write=True,
@@ -295,3 +297,18 @@ class TestProcessToolFilter:
         )
         assert 'CustomCountTool' not in self.tool_registry
         assert 'ModelListTool' not in self.tool_registry
+
+    def test_core_tools_default(self):
+        """Test core tools enabled by default"""
+        process_tool_filter(
+            tool_registry=self.tool_registry,
+            allow_write=True,
+        )
+
+        # Core tools
+        assert 'ListIndexTool' in self.tool_registry
+        assert 'ClusterHealthTool' in self.tool_registry
+
+        # Non-core tools
+        assert 'IndicesStatsTool' not in self.tool_registry
+        assert 'ListModelTool' not in self.tool_registry

@@ -31,6 +31,9 @@ pip install opensearch-mcp-server-py
 
 ## Available Tools
 
+By default, only **core tools** are enabled to provide essential OpenSearch functionality:
+
+### Core Tools (Enabled by Default)
 - [ListIndexTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-indices/): Lists all indices in OpenSearch with full information including docs.count, docs.deleted, store.size, etc. If an index parameter is provided, returns detailed information about that specific index.
 - [IndexMappingTool](https://docs.opensearch.org/docs/latest/ml-commons-plugin/agents-tools/tools/index-mapping-tool/): Retrieves index mapping and setting information for an index in OpenSearch.
 - [SearchIndexTool](https://docs.opensearch.org/docs/latest/ml-commons-plugin/agents-tools/tools/search-index-tool/): Searches an index using a query written in query domain-specific language (DSL) in OpenSearch.
@@ -39,6 +42,10 @@ pip install opensearch-mcp-server-py
 - [CountTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/count/): Returns number of documents matching a query.
 - [ExplainTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/explain/): Returns information about why a specific document matches (or doesn't match) a query.
 - [MsearchTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/multi-search/): Allows to execute several search operations in one request.
+
+### Additional Tools (Disabled by Default)
+The following tools are available but disabled by default. To enable them, see the [Tool Filtering](USER_GUIDE.md#tool-filtering) section in the User Guide.
+
 - [GetClusterStateTool](https://docs.opensearch.org/docs/latest/api-reference/cluster-api/cluster-state/): Gets the current state of the cluster including node information, index settings, and more.
 - [GetSegmentsTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-segments/): Gets information about Lucene segments in indices, including memory usage, document counts, and segment sizes.
 - [CatNodesTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-nodes/): Gets information about nodes in the OpenSearch cluster, including system metrics like CPU usage, memory, disk space, and node roles.

@@ -4,6 +4,8 @@ tool_category:
     - ExplainTool
 
 tool_filters:
+  enabled_tools:
+    - IndicesStatsTool
   disabled_categories:
     - critical
   disabled_tools:
