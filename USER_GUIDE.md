@@ -451,7 +451,7 @@ When using multi-mode, each cluster in your YAML configuration file accepts the 
 
 ## Tool Filter
 
-OpenSearch MCP server supports tool filtering to enable or disable specific tools by name, category, or operation type. You can configure filtering using either a YAML configuration file or environment variables. 
+OpenSearch MCP server supports tool filtering to enable or disable specific tools by name, category, or operation type. You can configure filtering using either a YAML configuration file or environment variables.
 
 **Important Note: Tool filtering is only supported in Single Mode. In Multi Mode, all tools are available without any filtering.**
 
@@ -520,6 +520,7 @@ export OPENSEARCH_SETTINGS_ALLOW_WRITE=true
 ### Important Notes
 - Tool names are case-insensitive
 - All configuration fields are optional
+- Disabled filters have higher priority: If a tool is both enabled and disabled, it will be disabled
 - When both config file and environment variables are provided, the config file will be prioritized
 - Tool filtering is only supported in single mode. In multi mode, tool filtering is not supported
 
