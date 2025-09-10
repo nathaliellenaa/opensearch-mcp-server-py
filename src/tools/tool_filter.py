@@ -82,10 +82,11 @@ def process_tool_filter(
         category_to_tools = {}
         enabled_tool_list = []
         disabled_tool_list = []
-        enabled_category_list = []
+        enabled_category_list = ['core_tools']
         disabled_category_list = []
         enabled_tools_regex_list = []
         disabled_tools_regex_list = []
+        core_tools_display_name = []
 
         # Initialize core tool names
         core_tools = [
@@ -99,11 +100,14 @@ def process_tool_filter(
             'MsearchTool',
         ]
 
-        # Build enabled list using display names
+        # Build core tools list using display names
         for tool_name in core_tools:
             if tool_name in tool_registry:
                 tool_display_name = tool_registry[tool_name].get('display_name', tool_name)
-                enabled_tool_list.append(tool_display_name)
+                core_tools_display_name.append(tool_display_name)
+
+        # Add core_tools as a built-in category using display name
+        category_to_tools['core_tools'] = core_tools_display_name
 
         # Process YAML config file if provided
         config = load_yaml_config(filter_path)
@@ -113,9 +117,9 @@ def process_tool_filter(
             tool_filters = config.get('tool_filters', {})
 
             # Get lists from config
-            enabled_tool_list.extend(tool_filters.get('enabled_tools', []))
+            enabled_tool_list = tool_filters.get('enabled_tools', [])
             disabled_tool_list = tool_filters.get('disabled_tools', [])
-            enabled_category_list = tool_filters.get('enabled_categories', [])
+            enabled_category_list.extend(tool_filters.get('enabled_categories', []))
             disabled_category_list = tool_filters.get('disabled_categories', [])
             enabled_tools_regex_list = tool_filters.get('enabled_tools_regex', [])
             disabled_tools_regex_list = tool_filters.get('disabled_tools_regex', [])

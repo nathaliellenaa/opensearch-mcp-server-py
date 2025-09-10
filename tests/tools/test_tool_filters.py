@@ -312,3 +312,16 @@ class TestProcessToolFilter:
         # Non-core tools
         assert 'IndicesStatsTool' not in self.tool_registry
         assert 'ListModelTool' not in self.tool_registry
+
+    def test_disable_core_tools(self):
+        """Test disable core tools categories, which is enabled by default"""
+        process_tool_filter(
+            tool_registry=self.tool_registry,
+            disabled_categories='core_tools',
+            allow_write=True,
+        )
+
+        # Core tools, should be disabled
+        assert 'ListIndexTool' not in self.tool_registry
+        assert 'ClusterHealthTool' not in self.tool_registry
+        assert 'ExplainTool' not in self.tool_registry
