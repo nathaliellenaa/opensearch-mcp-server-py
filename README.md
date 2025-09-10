@@ -35,7 +35,7 @@ By default, only **core tools** are enabled to provide essential OpenSearch func
 
 ### Core Tools (Enabled by Default)
 
-Core tools are grouped under the `core_tools` category. You can disable all core tools at once using `OPENSEARCH_DISABLED_CATEGORIES=core_tools`.
+Core tools are grouped under the `core_tools` category and can be disabled at once using `OPENSEARCH_DISABLED_CATEGORIES=core_tools`. Avoid creating custom categories with this name as they will override the built-in category.
 
 - [ListIndexTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-indices/): Lists all indices in OpenSearch with full information including docs.count, docs.deleted, store.size, etc. If an index parameter is provided, returns detailed information about that specific index.
 - [IndexMappingTool](https://docs.opensearch.org/docs/latest/ml-commons-plugin/agents-tools/tools/index-mapping-tool/): Retrieves index mapping and setting information for an index in OpenSearch.
