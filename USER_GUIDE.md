@@ -540,6 +540,8 @@ tools:
   ListIndexTool:
     display_name: "Index_Manager"
     description: "List and manage OpenSearch indices"
+    args:
+      index: "Custom description for the 'index' argument in ListIndexTool."
   GetShardsTool:
     description: "Retrieve detailed information about OpenSearch shards"
 ```
@@ -553,18 +555,18 @@ python -m mcp_server_opensearch --config path/to/config.yml
 
 Customize tools directly via command line arguments:
 ```bash
-python -m mcp_server_opensearch --tool.ListIndexTool.display_name="Index_Manager" --tool.SearchIndexTool.description="Custom search tool"
+python -m mcp_server_opensearch --tool.ListIndexTool.display_name="Index_Manager" --tool.SearchIndexTool.description="Custom search tool" --tool.GetShardsTool.args.index.description="Custom description" 
 ```
 
 ### Priority
 
-Runtime parameters have higher priority than configuration file settings. If both are provided, runtime parameters will override the corresponding values in the configuration file.
+Configuration file settings have higher priority than runtime parameters. If both are provided, configuration file settings will override the corresponding values in the runtime parameters.
 
 ### Important Notes
 - Tool customization is available in both single and multi modes
 - Only existing tools can be customized; new tools cannot be created
 - Changes take effect immediately when the server starts
-- Invalid tool names or properties will be ignored
+- Invalid tool names or properties will throw an error
 
 ## LangChain Integration
 

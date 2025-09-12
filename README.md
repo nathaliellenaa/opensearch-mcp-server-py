@@ -47,7 +47,7 @@ Core tools are grouped under the `core_tools` category and can be disabled at on
 - [MsearchTool](https://docs.opensearch.org/docs/latest/api-reference/search-apis/multi-search/): Allows to execute several search operations in one request.
 
 ### Additional Tools (Disabled by Default)
-The following tools are available but disabled by default. To enable them, see the [Tool Filtering](USER_GUIDE.md#tool-filtering) section in the User Guide.
+The following tools are available but disabled by default. To enable them, see the [Tool Filter](USER_GUIDE.md#tool-filter) section in the User Guide.
 
 - [GetClusterStateTool](https://docs.opensearch.org/docs/latest/api-reference/cluster-api/cluster-state/): Gets the current state of the cluster including node information, index settings, and more.
 - [GetSegmentsTool](https://docs.opensearch.org/docs/latest/api-reference/cat/cat-segments/): Gets information about Lucene segments in indices, including memory usage, document counts, and segment sizes.
